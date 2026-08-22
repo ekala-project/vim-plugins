@@ -12,6 +12,9 @@ let
   # Post-processing overlay for aliases and overrides
   pluginOverrides = import ./vim-packages.nix;
 
+  # User overlays
+  userPlugins = prev.lib.composeManyExtensions final.config.overlays.vimPlugins;
+
   # Base scope provides builders and access to top-level packages.
   # callPackage resolves from both the vim scope (self) and top-level pkgs (final),
   # allowing plugin expressions to request buildVimPlugin, fetchFromGitHub,
@@ -32,6 +35,7 @@ let
   vimPlugins = final.lib.pipe base [
     (final.lib.extends pluginAutoDiscover)
     (final.lib.extends pluginOverrides)
+    (final.lib.extends userPlugins)
     final.lib.makeExtensible
   ];
 
