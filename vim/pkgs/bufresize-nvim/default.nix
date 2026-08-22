@@ -1,0 +1,25 @@
+# This file is auto-generated. Do not edit.
+{
+  buildVimPlugin,
+  fetchFromGitHub,
+  lib,
+}:
+
+buildVimPlugin {
+  pname = "bufresize.nvim";
+  version = "0-unstable-2022-03-21";
+
+  src = fetchFromGitHub {
+    owner = "kwkarlwang";
+    repo = "bufresize.nvim";
+    rev = "3b19527ab936d6910484dcc20fb59bdb12322d8b";
+    hash = "sha256-6jqlKe8Ekm+3dvlgFCpJnI0BZzWC3KDYoOb88/itH+g=";
+  };
+
+  meta = {
+    description = "Keep buffer dimensions in proportion when terminal window is resized";
+    homepage = "https://github.com/kwkarlwang/bufresize.nvim";
+    license = lib.licenses.mit;
+    maintainers = [ ];
+  };
+}
