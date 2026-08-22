@@ -1,7 +1,8 @@
 { lib, ... }:
 
 let
-  nativeOverlay = lib.packageSets.mkAutoCalledPackageDir ./pkgs;
+  # No top-level pkgs exist at this time
+  # nativeOverlay = lib.packageSets.mkAutoCalledPackageDir ./pkgs;
   vimPluginsScopeOverlay = import ./vim-plugins-scope.nix;
   pkgsOverlay = import ./top-level.nix;
   overlayType = lib.mkOptionType {
@@ -22,7 +23,7 @@ in
 
   config.overlays = {
     pkgs = [
-      nativeOverlay
+      # nativeOverlay
       vimPluginsScopeOverlay
       pkgsOverlay
     ];
