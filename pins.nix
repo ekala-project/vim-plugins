@@ -6,15 +6,15 @@ let
     let
       node = lock.nodes.${attr}.locked;
     in
-      builtins.fetchTree {
-        inherit (node)
-          type
-          owner
-          repo
-          narHash
-          rev
-          ;
-      };
+    builtins.fetchTree {
+      inherit (node)
+        type
+        owner
+        repo
+        narHash
+        rev
+        ;
+    };
 in
 {
   lib = getInfo "nix-lib";
