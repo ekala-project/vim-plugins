@@ -1,3 +1,4 @@
+# This file is auto-generated. Do not edit.
 {
   buildVimPlugin,
   fetchFromGitHub,
@@ -16,9 +17,9 @@ buildVimPlugin {
   };
 
   meta = {
-    description = "A Git wrapper so awesome, it should be illegal";
+    description = "fugitive.vim: A Git wrapper so awesome, it should be illegal";
     homepage = "https://github.com/tpope/vim-fugitive";
-    license = lib.licenses.vim;
+    license = lib.licenses.unfree;
     maintainers = [ ];
   };
 }

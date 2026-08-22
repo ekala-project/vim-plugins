@@ -15,6 +15,8 @@ This repository is a curated collection of Vim/Neovim plugins for a poly-repo Ni
 | [`build-support/vim-utils.nix`](build-support/vim-utils.nix) | `buildVimPlugin`, `toVimPlugin`, and hook definitions |
 | [`build-support/hooks/`](build-support/hooks/) | Shell hooks for helptag generation and command checking |
 | [`repos-packages.nix`](repos-packages.nix) | Standalone helper that projects overlays onto base packages (useful for validation/testing) |
+| [`vim/update.py`](vim/update.py) | Plugin update script; fetches metadata from GitHub and generates `default.nix` files |
+| [`vim/vim-plugin-names`](vim/vim-plugin-names) | CSV catalog of plugins: `repo,branch,alias` |
 | [`vim/pkgs/`](vim/pkgs/) | Auto-discovered Vim plugin expressions |
 | [`pkgs/`](pkgs/) | Native (C/C++) package expressions |
 | [`README.md`](README.md) | Brief project overview |
@@ -31,7 +33,27 @@ pkgs/tree-sitter/default.nix       -->  pkgs.tree-sitter
 
 Only add an entry to `vim-packages.nix` if a plugin needs post-processing (aliasing, dependency patching, overrides).
 
-## Adding a Vim Plugin
+## Adding a Vim Plugin (Automated)
+
+The preferred way to add plugins is via the update script:
+
+```bash
+nix-shell -p nix-prefetch-github nix-prefetch-git --run \
+  "python3 vim/update.py add owner/repo"
+```
+
+This fetches metadata from GitHub, resolves the latest tag, and generates `vim/pkgs/<plugin-name>/default.nix` automatically. The plugin is also added to `vim/vim-plugin-names`.
+
+To update all plugins:
+
+```bash
+nix-shell -p nix-prefetch-github nix-prefetch-git --run \
+  "python3 vim/update.py -p 1 update"
+```
+
+Use `--github-token` or `$GITHUB_TOKEN` for higher API rate limits.
+
+## Adding a Vim Plugin (Manual)
 
 Create `vim/pkgs/<plugin-name>/default.nix` following this pattern:
 

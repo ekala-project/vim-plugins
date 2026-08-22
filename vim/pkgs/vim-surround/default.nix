@@ -1,3 +1,4 @@
+# This file is auto-generated. Do not edit.
 {
   buildVimPlugin,
   fetchFromGitHub,
@@ -16,9 +17,9 @@ buildVimPlugin {
   };
 
   meta = {
-    description = "Delete/change/add parentheses/quotes/XML-tags/much more with ease";
+    description = "surround.vim: Delete/change/add parentheses/quotes/XML-tags/much more with ease";
     homepage = "https://github.com/tpope/vim-surround";
-    license = lib.licenses.vim;
+    license = lib.licenses.unfree;
     maintainers = [ ];
   };
 }
