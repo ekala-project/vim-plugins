@@ -17,16 +17,10 @@
     }:
     let
       forAllSystems = nix-lib.lib.genAttrs (import systems);
-      pkgsModule = import ./pkgs-module.nix;
     in
     {
-      legacyPackages = forAllSystems (
-        system:
-        import ./. {
-          inherit system;
-          modules = [ pkgsModule ];
-        }
-      );
+      # default.nix already includes ./pkgs-module.nix
+      legacyPackages = forAllSystems (system: import ./. { inherit system; });
 
       formatter = corepkgs.formatter;
       nixConfig = {
