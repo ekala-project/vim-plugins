@@ -1,28 +1,46 @@
-{ ... }:
+# Unified list of all derivations contributed by vim-plugins.
+#
+# This includes:
+#   - Top-level packages from top-level.nix
+#   - Vim plugins from vim/pkgs/ and vim-packages.nix
+#
+# Only attributes this repository defines are exposed; builders and
+# helpers in the vimPlugins scope (callPackage, buildVimPlugin, ...) are
+# filtered out. Useful for CI validation, e.g.:
+#   nix-build ./repos-packages.nix -A vimPlugins.plenary-nvim
+#
+# Plugins without a recognised license are marked unfree by vim/update.py,
+# so evaluating the whole set requires opting in:
+#   nix-instantiate ./repos-packages.nix --arg config '{ allowUnfree = true; }'
+{
+  config ? { },
+  ...
+}:
 let
   pins = import ./pins.nix;
   lib = import pins.lib;
-  nativeOverlay = lib.packageSets.mkAutoCalledPackageDir ./pkgs;
-  vimPluginsScopeOverlay = import ./vim-plugins-scope.nix;
-  pkgsOverlay = import ./top-level.nix;
-  pkgs = import pins.core { modules = [ (import ./pkgs-module.nix) ]; };
-  mkProjection = overlay: base: lib.fix (self: base // overlay self base);
+  pkgs = import ./. { inherit config; };
 
-  # Vim plugins scope from overlay
-  combinedVimOverlay = lib.composeManyExtensions [
-    vimPluginsScopeOverlay
-    pkgsOverlay
-  ];
-  projectedVim = mkProjection combinedVimOverlay pkgs;
+  overlayKeys =
+    overlay:
+    removeAttrs (overlay (_: _: { }) { }) [
+      "_internalCallByNamePackageFile"
+    ];
 
-  # Native packages from overlay
-  combinedNativeOverlay = lib.composeManyExtensions [
-    nativeOverlay
+  # --- Top-level packages (top-level.nix) ---
+  pkgsOverlayKeys = overlayKeys (import ./top-level.nix);
+  topLevelPkgs = builtins.intersectAttrs pkgsOverlayKeys pkgs;
+
+  # --- Vim plugins (vim/pkgs/ directory + vim-packages.nix overrides) ---
+  pluginOverlay = lib.composeManyExtensions [
+    (lib.packageSets.mkAutoCalledPackageDir ./vim/pkgs)
+    (import ./vim-packages.nix)
   ];
-  projectedNative = mkProjection combinedNativeOverlay pkgs;
-  nativeOverlayKeys = combinedNativeOverlay (_: _: { }) { };
-  nativePkgs = removeAttrs (builtins.intersectAttrs nativeOverlayKeys projectedNative) [
-    "_internalCallByNamePackageFile"
-  ];
+  vimPlugins = builtins.intersectAttrs (overlayKeys pluginOverlay) pkgs.vimPlugins;
 in
-{ vimPlugins = projectedVim.vimPlugins or { }; } // nativePkgs
+topLevelPkgs
+// {
+  vimPlugins = vimPlugins // {
+    recurseForDerivations = true;
+  };
+}
