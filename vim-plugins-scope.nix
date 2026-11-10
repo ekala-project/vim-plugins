@@ -4,6 +4,8 @@ let
   pins = import ./pins.nix;
   nix-lib = import pins.lib;
 
+  inherit (final.lib) composeManyExtensions extends makeScope;
+
   vimUtils = final.callPackage ./build-support/vim-utils.nix { };
 
   # Auto-discover plugin expressions from vim/pkgs/
@@ -13,31 +15,27 @@ let
   pluginOverrides = import ./vim-packages.nix;
 
   # User overlays
-  userPlugins = prev.lib.composeManyExtensions final.config.overlays.vimPlugins;
+  userPlugins = composeManyExtensions final.config.overlays.vimPlugins;
 
-  # Base scope provides builders and access to top-level packages.
-  # callPackage resolves from both the vim scope (self) and top-level pkgs (final),
-  # allowing plugin expressions to request buildVimPlugin, fetchFromGitHub,
+  # Base scope provides the builders. makeScope's callPackage resolves
+  # arguments from the vim scope first and falls back to top-level pkgs,
+  # so plugin expressions can request buildVimPlugin, fetchFromGitHub,
   # other plugins, etc. via function arguments.
   base = self: {
     inherit (vimUtils) buildVimPlugin toVimPlugin;
-    callPackage = final.lib.callPackageWith (final // self);
-    inherit (final)
-      fetchFromGitHub
-      fetchurl
-      fetchgit
-      lib
-      stdenv
-      ;
-    vim = final.vim or null;
+
+    # Compatibility with nixpkgs, where vimPlugins is built with
+    # makeExtensible. Equivalent to overrideScope.
+    extend = self.overrideScope;
   };
 
-  vimPlugins = final.lib.pipe base [
-    (final.lib.extends pluginAutoDiscover)
-    (final.lib.extends pluginOverrides)
-    (final.lib.extends userPlugins)
-    final.lib.makeExtensible
-  ];
+  vimPlugins = makeScope final.newScope (
+    final.lib.pipe base [
+      (extends pluginAutoDiscover)
+      (extends pluginOverrides)
+      (extends userPlugins)
+    ]
+  );
 
 in
 {
